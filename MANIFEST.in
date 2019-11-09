@@ -1,0 +1,6 @@
+include LICENSE
+include README.rst
+recursive-include devnotes/static *
+recursive-include devnotes/templates *
+recursive-include docs *
+

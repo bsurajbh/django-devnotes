@@ -1,0 +1,135 @@
+{% load staticfiles %}
+<link rel="stylesheet" href="{% static '/devnotes/css/devnote.css' %}">
+<a class="openbtn" style="display:none" id="openbtn" onclick="toggleDevtab(1)">Devnotes &#187;</a>
+<div id="mySidebar" class="sidenav" style="display:none;">
+   <a class="tooltip">
+      <li class="closebtn give-border" id="closebtn" onclick="toggleDevtab(0)">&#171; Devnotes</li>
+   </a>
+   <a class="tooltip">
+      <li class=''>
+         Add +
+      </li>
+      <div class="tooltiptext">
+         <div class="form-box">
+            <form action="" id="add-note-form" autocomplete="off">
+               <label for="id_name">Name</label>
+               {{notes_form.name}}
+               <label for="id_description">Description</label>
+               {{notes_form.description}}
+               <div class="devnote-save-btn">
+                  <button type="submit" class="save-note" id="save-note" value="Save">Save</button>
+               </div>
+            </form>
+         </div>
+      </div>
+   </a>
+   {% for devnote in devnotes %}
+   <a class="tooltip">
+      <li id="note-{{devnote.id}}" data-id="{{devnote.id}}" data-status="{% if devnote.status %}1{% else %}0{% endif %}" onclick="strikeoutList({{devnote.id}})"
+         style="{% if devnote.status %}text-decoration:line-through; {% else %}text-decoration:none;{% endif %}">
+         {{devnote.name|truncatechars:10}}
+      </li>
+      <div class="tooltiptext">
+         <div class="tooltip-content">
+            <p align="center">{{devnote.name}}</p>
+            <hr>
+            <p align="justify">{{devnote.description}}</p>
+         </div>
+      </div>
+   </a>
+   {% endfor %}
+</div>
+<script src="{% static '/devnotes/js/jquery.min.js' %}"></script>
+<script type="text/javascript">
+   function instanciate() {
+     is_set_devnote = window.localStorage.getItem('devnote_tab');
+     if(is_set_devnote===null){
+        window.localStorage.setItem('devnote_tab',0);
+        is_set_devnote = window.localStorage.getItem('devnote_tab');
+     }
+       if (is_set_devnote == '0') {
+         closeNav();
+       } else {
+         openNav();
+   }
+ }
+   function strikeoutList(id) {
+     $.ajax({
+       url: '{% url "devnotes:update-status" %}',
+       type: "POST",
+       data: {
+         'id': $("#note-" + id + "").attr('data-id'),
+         'status': $("#note-" + id + "").attr('data-status')
+       },
+       dataType: 'json',
+       success: function(data) {
+         if (data.success) {
+           if ($("#note-" + id + "").attr('data-status') == '1') {
+             $("#note-" + id + "").css("text-decoration", "none");
+             $("#note-" + id + "").attr('data-status', '0');
+           } else {
+             $("#note-" + id + "").css("text-decoration", "line-through");
+             $("#note-" + id + "").attr('data-status', '1');
+           }
+         }
+       }
+     });
+   }
+
+   $("#save-note").on("click", function(e){
+     e.preventDefault();
+     note_content =  $('#add-note-form').serializeArray();
+     name= note_content[0].value;
+     description= note_content[1].value;
+
+     $.ajax({
+       url: '{% url "devnotes:add-note" %}',
+       type: "POST",
+       data: {name,description},
+       dataType: 'json',
+       success: function(data) {
+         console.log(data);
+         if (data.status) {
+           $("#add-note-form").css("border-color", "green")
+           $("#add-note-form").addClass("blinking");
+           setTimeout(function () {
+             $("#add-note-form").removeClass("blinking");
+             $("#add-note-form").css("border-color", "white")
+     }, 3000);
+
+           } else {
+             $("#add-note-form").css("border-color", "red")
+             $("#add-note-form").addClass("blinking");
+           }
+         }
+     });
+   });
+
+   function openNav() {
+     document.getElementById("mySidebar").style.display = "block";
+     document.getElementById("openbtn").style.display = "none";
+     document.getElementById("closebtn").style.display = "block";
+     window.localStorage.setItem('devnote_tab',1);
+
+   }
+   function closeNav() {
+     document.getElementById("mySidebar").style.display = "none";
+     document.getElementById("closebtn").style.display = "none";
+     document.getElementById("openbtn").style.display = "block";
+     window.localStorage.setItem('devnote_tab',0);
+
+   }
+   function toggleDevtab(set){
+     window.localStorage.setItem('devnote_tab',set)
+     if(set){
+       openNav();
+     }else{
+       closeNav();
+     }
+   }
+   $('#id_name').on('blur change', function() {
+     $("#add-note-form").removeClass("blinking");
+     $("#add-note-form").css("border-color", "white")
+   });
+   window.onload = instanciate();
+</script>
