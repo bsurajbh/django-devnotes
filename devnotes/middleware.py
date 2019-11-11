@@ -3,6 +3,7 @@ from django.utils.deprecation import MiddlewareMixin
 from django.template.loader import render_to_string
 from . models import Devnote
 from . forms import DevnoteForm
+from django.conf import settings
 import re
 
 class InjectNoteViewMiddleware(MiddlewareMixin):
@@ -12,8 +13,14 @@ class InjectNoteViewMiddleware(MiddlewareMixin):
         self.get_response = get_response
 
     def __call__(self, request):
+        """ skip middleware if debug is not true"""
+
+        if not settings.DEBUG:
+            return self.get_response(request)
+
         """if request is admin or ajax based skip the injection else inject"""
-        if request.is_ajax() or 'admin' in request:
+
+        if request.is_ajax() or 'admin' in request.path:
             response = self.get_response(request)
         else:
             response = self.inject_notes(self.get_response(request))
