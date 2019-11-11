@@ -6,7 +6,7 @@ from . forms import DevnoteForm
 from django.conf import settings
 import re
 
-class InjectNoteViewMiddleware(MiddlewareMixin):
+class DevnotesMiddleware(MiddlewareMixin):
     """ inject devnote view into html that is rendered"""
 
     def __init__(self, get_response):
