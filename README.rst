@@ -1,6 +1,6 @@
 ## Devnotes
 
-Devnotes is a simple Django app to store handy notes alongside your project.   
+Devnotes is a simple Django app to store handy notes alongside your project.
 
 ----
 
@@ -47,6 +47,6 @@ Devnotes is a simple Django app to store handy notes alongside your project.
 		     import devnotes
 		     urlpatterns = [
 			     path('devnotes/', include('devnotes.urls')),
-			 ] + urlpatterns    
+			 ] + urlpatterns
 
  7. Thats it :smile:
